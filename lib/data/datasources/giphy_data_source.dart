@@ -8,9 +8,11 @@ class GiphyDataSource {
   final String apiKey = Config.giphyApiKey;
   final String baseUrl = 'https://api.giphy.com/v1/gifs';
 
-  Future<List<GifModel>> searchGifs(String query) async {
+  Future<List<GifModel>> searchGifs(String query, {int page = 1}) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/search?api_key=$apiKey&q=$query&limit=20'),
+      Uri.parse(
+        '$baseUrl/search?api_key=$apiKey&q=$query&limit=20&offset=${(page - 1) * 20}',
+      ),
     );
 
     print('Raw API response: ${response.body}');
