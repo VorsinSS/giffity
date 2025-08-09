@@ -5,9 +5,10 @@ import 'package:giffity/presentation/bloc/gif_event.dart';
 import 'package:giffity/presentation/bloc/gif_state.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:giffity/presentation/pages/favorites_page.dart';
+import 'package:giffity/presentation/pages/gif_detail_page.dart'; // Добавьте этот импорт
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -124,20 +125,28 @@ class _HomePageState extends State<HomePage> {
 
                       return GestureDetector(
                         onTap: () {
-                          // Можно добавить просмотр в полный размер
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GifDetailPage(gif: gif),
+                            ),
+                          );
                         },
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            CachedNetworkImage(
-                              imageUrl: gif.url,
-                              fit: BoxFit.cover,
-                              placeholder:
-                                  (context, url) =>
-                                      Container(color: Colors.grey[200]),
-                              errorWidget:
-                                  (context, url, error) =>
-                                      const Icon(Icons.error),
+                            Hero(
+                              tag: 'gif-${gif.id}',
+                              child: CachedNetworkImage(
+                                imageUrl: gif.url,
+                                fit: BoxFit.cover,
+                                placeholder:
+                                    (context, url) =>
+                                        Container(color: Colors.grey[200]),
+                                errorWidget:
+                                    (context, url, error) =>
+                                        const Icon(Icons.error),
+                              ),
                             ),
                             Positioned(
                               top: 8,

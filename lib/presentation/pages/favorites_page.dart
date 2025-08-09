@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:giffity/data/models/gif_model.dart';
-import 'package:giffity/presentation/bloc/gif_bloc.dart';
 import 'package:giffity/presentation/bloc/gif_event.dart';
 import 'package:giffity/presentation/bloc/gif_state.dart';
-import 'package:hive/hive.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:giffity/data/models/gif_model.dart';
+import 'package:giffity/presentation/bloc/gif_bloc.dart';
+import 'package:giffity/presentation/pages/gif_detail_page.dart';
+import 'package:hive_flutter/hive_flutter.dart'; // Добавлен импорт
 
 class FavoritesPage extends StatefulWidget {
-  const FavoritesPage({Key? key}) : super(key: key);
+  const FavoritesPage({super.key});
 
   @override
   _FavoritesPageState createState() => _FavoritesPageState();
@@ -69,26 +69,40 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   child: const Icon(Icons.delete, color: Colors.white),
                 ),
                 confirmDismiss: (_) => _confirmDelete(gif),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: gif.url,
-                      fit: BoxFit.cover,
-                      placeholder:
-                          (context, url) => Container(color: Colors.grey[200]),
-                      errorWidget:
-                          (context, url, error) => const Icon(Icons.error),
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: IconButton(
-                        icon: const Icon(Icons.favorite, color: Colors.red),
-                        onPressed: () => _removeFromFavorites(gif),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GifDetailPage(gif: gif),
                       ),
-                    ),
-                  ],
+                    );
+                  },
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Hero(
+                        tag: 'gif-${gif.id}',
+                        child: CachedNetworkImage(
+                          imageUrl: gif.url,
+                          fit: BoxFit.cover,
+                          placeholder:
+                              (context, url) =>
+                                  Container(color: Colors.grey[200]),
+                          errorWidget:
+                              (context, url, error) => const Icon(Icons.error),
+                        ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: IconButton(
+                          icon: const Icon(Icons.favorite, color: Colors.red),
+                          onPressed: () => _removeFromFavorites(gif),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -147,10 +161,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
     if (confirmed == true) {
       await _favoritesBox.clear();
-      // Обновляем состояние в BLoC если нужно
       final bloc = context.read<GifBloc>();
       if (bloc.state is GifLoadedState) {
-        bloc.add(LoadMoreGifsEvent()); // Или другой подходящий ивент
+        bloc.add(LoadMoreGifsEvent());
       }
     }
   }
