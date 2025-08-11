@@ -14,10 +14,10 @@ class SettingsPage extends StatelessWidget {
       body: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
           return SwitchListTile(
-            title: const Text('Тёмная тема'),
-            value: state.isDarkMode,
+            title: const Text('Темная тема'),
+            value: context.watch<ThemeBloc>().state.isDarkMode,
             onChanged: (value) {
-              themeBloc.add(ToggleThemeEvent(value));
+              context.read<ThemeBloc>().add(ToggleThemeEvent());
             },
           );
         },

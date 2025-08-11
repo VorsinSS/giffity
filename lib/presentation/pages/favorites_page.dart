@@ -6,7 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:giffity/data/models/gif_model.dart';
 import 'package:giffity/presentation/bloc/gif_bloc.dart';
 import 'package:giffity/presentation/pages/gif_detail_page.dart';
-import 'package:hive_flutter/hive_flutter.dart'; // Добавлен импорт
+import 'package:hive_flutter/hive_flutter.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
@@ -30,6 +30,15 @@ class _FavoritesPageState extends State<FavoritesPage> {
       appBar: AppBar(
         title: const Text('Избранное'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: _FavoritesSearchDelegate(_favoritesBox),
+              );
+            },
+          ),
           if (_favoritesBox.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete),
@@ -77,8 +86,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         builder:
                             (context) => GifDetailPage(
                               gif: gif,
-                              heroTag:
-                                  'fav-gif-${gif.id}-$index', // Уникальный тег для избранного
+                              heroTag: 'fav-gif-${gif.id}-$index',
                             ),
                       ),
                     );
@@ -175,8 +183,117 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   Future<void> _removeFromFavorites(GifModel gif) async {
     await _favoritesBox.delete(gif.id);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Удалено из избранного')));
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Удалено из избранного')));
+    }
+  }
+}
+
+class _FavoritesSearchDelegate extends SearchDelegate<String> {
+  final Box<GifModel> favoritesBox;
+
+  _FavoritesSearchDelegate(this.favoritesBox);
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, '');
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return _buildSearchResults();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return _buildSearchResults();
+  }
+
+  Widget _buildSearchResults() {
+    final results =
+        favoritesBox.values.where((gif) {
+          final title = gif.title.toLowerCase();
+          final searchLower = query.toLowerCase();
+          return title.contains(searchLower);
+        }).toList();
+
+    if (results.isEmpty) {
+      return const Center(child: Text('Ничего не найдено'));
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(8),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 1,
+      ),
+      itemCount: results.length,
+      itemBuilder: (context, index) {
+        final gif = results[index];
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) => GifDetailPage(
+                      gif: gif,
+                      heroTag: 'search-gif-${gif.id}-$index',
+                    ),
+              ),
+            );
+          },
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Hero(
+                tag: 'search-gif-${gif.id}-$index',
+                child: CachedNetworkImage(
+                  imageUrl: gif.url,
+                  fit: BoxFit.cover,
+                  placeholder:
+                      (context, url) => Container(color: Colors.grey[200]),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  icon: const Icon(Icons.favorite, color: Colors.red),
+                  onPressed: () {
+                    favoritesBox.delete(gif.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Удалено из избранного')),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

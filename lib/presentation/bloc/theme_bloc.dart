@@ -1,23 +1,23 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-
-abstract class ThemeEvent {}
-
-class ToggleThemeEvent extends ThemeEvent {
-  final bool isDarkMode;
-  ToggleThemeEvent(this.isDarkMode);
-}
+// lib/presentation/bloc/theme_bloc.dart
+import 'package:bloc/bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:giffity/data/models/settings_model.dart';
 
 class ThemeState {
   final bool isDarkMode;
-  ThemeState(this.isDarkMode);
+
+  ThemeState({required this.isDarkMode});
 }
 
-class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
-  final Box settingsBox;
+class ThemeEvent {}
 
-  ThemeBloc(this.settingsBox)
-    : super(ThemeState(settingsBox.get('isDarkMode', defaultValue: false))) {
+class ToggleThemeEvent extends ThemeEvent {}
+
+class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
+  final Box<SettingsModel> settingsBox;
+
+  ThemeBloc({required this.settingsBox, required SettingsModel initialSettings})
+    : super(ThemeState(isDarkMode: initialSettings.isDarkMode)) {
     on<ToggleThemeEvent>(_onToggleTheme);
   }
 
@@ -25,7 +25,14 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     ToggleThemeEvent event,
     Emitter<ThemeState> emit,
   ) async {
-    await settingsBox.put('isDarkMode', event.isDarkMode);
-    emit(ThemeState(event.isDarkMode));
+    final newState = ThemeState(isDarkMode: !state.isDarkMode);
+
+    // Сохраняем в Hive
+    await settingsBox.put(
+      'settings',
+      SettingsModel(isDarkMode: newState.isDarkMode),
+    );
+
+    emit(newState);
   }
 }

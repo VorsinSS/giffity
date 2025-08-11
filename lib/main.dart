@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:giffity/data/datasources/giphy_data_source.dart';
+import 'package:giffity/data/models/settings_model.dart'; // Добавляем импорт
 import 'package:giffity/presentation/theme/app_theme.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:giffity/data/models/gif_model.dart';
@@ -13,36 +14,53 @@ void main() async {
 
   await Hive.initFlutter();
   Hive.registerAdapter(GifModelAdapter());
+  Hive.registerAdapter(SettingsModelAdapter()); // Регистрируем новый адаптер
 
-  // Открываем коробку ОДИН раз с явным указанием типа
+  // Открываем коробки с явным указанием типов
   final favoritesBox = await Hive.openBox<GifModel>('favorites');
-  final settingsBox = await Hive.openBox('settings');
+  final settingsBox = await Hive.openBox<SettingsModel>('settings');
+
+  // Загружаем сохраненные настройки или используем светлую тему по умолчанию
+  final settings =
+      settingsBox.get('settings') ?? SettingsModel(isDarkMode: false);
 
   runApp(
     MyApp(
       settingsBox: settingsBox,
-      favoritesBox: favoritesBox, // Передаем в MyApp
+      favoritesBox: favoritesBox,
+      initialSettings: settings, // Передаем начальные настройки
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  final Box settingsBox;
+  final Box<SettingsModel> settingsBox;
   final Box<GifModel> favoritesBox;
+  final SettingsModel initialSettings;
 
-  const MyApp({Key? key, required this.settingsBox, required this.favoritesBox})
-    : super(key: key);
+  const MyApp({
+    Key? key,
+    required this.settingsBox,
+    required this.favoritesBox,
+    required this.initialSettings,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<ThemeBloc>(create: (context) => ThemeBloc(settingsBox)),
+        BlocProvider<ThemeBloc>(
+          create:
+              (context) => ThemeBloc(
+                settingsBox: settingsBox,
+                initialSettings: initialSettings,
+              ),
+        ),
         BlocProvider<GifBloc>(
           create:
               (context) => GifBloc(
                 dataSource: GiphyDataSource(),
-                favoritesBox: favoritesBox, // Используем уже открытую коробку
+                favoritesBox: favoritesBox,
               ),
         ),
       ],

@@ -1,7 +1,10 @@
-// lib/data/models/gif_model.g.dart
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'gif_model.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
 
 class GifModelAdapter extends TypeAdapter<GifModel> {
   @override
@@ -31,4 +34,14 @@ class GifModelAdapter extends TypeAdapter<GifModel> {
       ..writeByte(2)
       ..write(obj.title);
   }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GifModelAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
 }
