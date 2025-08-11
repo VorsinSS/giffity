@@ -11,9 +11,8 @@ class GifBloc extends Bloc<GifEvent, GifState> {
   final Box<GifModel> favoritesBox;
   final int itemsPerPage = 20;
 
-  GifBloc(this.dataSource)
-    : favoritesBox = Hive.box<GifModel>('favorites'),
-      super(GifInitialState()) {
+  GifBloc({required this.dataSource, required this.favoritesBox})
+    : super(GifInitialState()) {
     on<SearchGifsEvent>(_onSearch);
     on<LoadMoreGifsEvent>(_onLoadMore);
     on<ToggleFavoriteEvent>(_onToggleFavorite);

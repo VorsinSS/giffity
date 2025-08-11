@@ -74,7 +74,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => GifDetailPage(gif: gif),
+                        builder:
+                            (context) => GifDetailPage(
+                              gif: gif,
+                              heroTag:
+                                  'fav-gif-${gif.id}-$index', // Уникальный тег для избранного
+                            ),
                       ),
                     );
                   },
@@ -82,7 +87,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     fit: StackFit.expand,
                     children: [
                       Hero(
-                        tag: 'gif-${gif.id}',
+                        tag: 'fav-gif-${gif.id}-$index',
                         child: CachedNetworkImage(
                           imageUrl: gif.url,
                           fit: BoxFit.cover,

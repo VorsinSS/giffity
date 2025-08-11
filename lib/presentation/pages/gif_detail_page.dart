@@ -9,8 +9,13 @@ import 'package:dio/dio.dart';
 
 class GifDetailPage extends StatefulWidget {
   final GifModel gif;
+  final String heroTag; // Обязательный параметр
 
-  const GifDetailPage({Key? key, required this.gif}) : super(key: key);
+  const GifDetailPage({
+    Key? key,
+    required this.gif,
+    required this.heroTag, // Теперь тег передается явно
+  }) : super(key: key);
 
   @override
   State<GifDetailPage> createState() => _GifDetailPageState();
@@ -133,7 +138,7 @@ class _GifDetailPageState extends State<GifDetailPage> {
         onTap: () => Navigator.pop(context),
         child: Center(
           child: Hero(
-            tag: 'gif-${widget.gif.id}',
+            tag: widget.heroTag,
             child: CachedNetworkImage(
               imageUrl: widget.gif.url,
               fit: BoxFit.contain,

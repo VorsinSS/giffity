@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:giffity/presentation/bloc/gif_bloc.dart';
 import 'package:giffity/presentation/bloc/gif_event.dart';
 import 'package:giffity/presentation/bloc/gif_state.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:giffity/presentation/pages/favorites_page.dart';
-import 'package:giffity/presentation/pages/gif_detail_page.dart'; // Добавьте этот импорт
+import 'package:giffity/presentation/pages/settings_page.dart';
+import 'package:giffity/presentation/pages/gif_detail_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -49,14 +50,23 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GIF Search'),
+        title: const Text('Giffity'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.favorite),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => FavoritesPage()),
+                MaterialPageRoute(builder: (context) => const FavoritesPage()),
               );
             },
           ),
@@ -128,7 +138,11 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => GifDetailPage(gif: gif),
+                              builder:
+                                  (context) => GifDetailPage(
+                                    gif: gif,
+                                    heroTag: 'home-gif-${gif.id}-$index',
+                                  ),
                             ),
                           );
                         },
@@ -136,7 +150,7 @@ class _HomePageState extends State<HomePage> {
                           fit: StackFit.expand,
                           children: [
                             Hero(
-                              tag: 'gif-${gif.id}',
+                              tag: 'home-gif-${gif.id}-$index',
                               child: CachedNetworkImage(
                                 imageUrl: gif.url,
                                 fit: BoxFit.cover,
