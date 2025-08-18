@@ -7,15 +7,13 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeBloc = BlocProvider.of<ThemeBloc>(context);
-
     return Scaffold(
       appBar: AppBar(title: const Text('Настройки')),
       body: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
           return SwitchListTile(
             title: const Text('Темная тема'),
-            value: context.watch<ThemeBloc>().state.isDarkMode,
+            value: state.isDarkMode, // Используем state из builder
             onChanged: (value) {
               context.read<ThemeBloc>().add(ToggleThemeEvent());
             },
